@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What ____ Are You?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+            body {
+                padding: 20px;
+            }
+        }
+
+        .title-screen {
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .title-screen.fade-out {
+            opacity: 0;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+        }
+
+        .category-blank {
+            display: inline-block;
+            min-width: 120px;
+            padding: 6px 12px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            color: #4a90e2;
+            vertical-align: middle;
+        }
+
+        @media (min-width: 768px) {
+            .category-blank {
+                min-width: 150px;
+                padding: 8px 15px;
+            }
+The selected category displays at the same size as the title text
+        }
+
+        select {
+            font-size: 0.6em;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #4a90e2;
+            cursor: pointer;
+            min-width: 100px;
+            max-width: 200px;
+            outline: none;
+        }
+
+        select:focus {
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+
+        @media (min-width: 768px) {
+            select {
+                font-size: 0.7em;
+                padding: 6px 10px;
+                min-width: 120px;
+            }
+        }
+
+        .category-selected {
+            color: #4a90e2;
+            font-size: inherit;
+        }
+
+        .quiz-screen, .result-screen {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease-in;
+        }
+
+        .quiz-screen.show, .result-screen.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #888;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .question-number {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        @media (min-width: 768px) {
+            .question-text {
+                font-size: 1.2em;
+                margin-bottom: 20px;
+            }
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #333;
+            color: #fff;
+            font-size: 0.95em;
+            line-height: 1.3;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .option {
+                font-size: 1em;
+            }
+        }
+
+        .option:hover {
+            border-color: #4a90e2;
+            background: #3a3a3a;
+        }
+
+        .option:active {
+            transform: scale(0.98);
+        }
+
+        .option.selected {
+            background: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .next-button {
+            margin-top: 15px;
+            padding: 12px 25px;
+            font-size: 1em;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            touch-action: manipulation;
+        }
+
+        @media (min-width: 768px) {
+            .next-button {
+                margin-top: 20px;
+                padding: 12px 30px;
+                width: auto;
+            }
+        }
+
+        .next-button:hover {
+            background: #357abd;
+        }
+
+        .next-button:active {
+            transform: scale(0.98);
+        }
+
+        .next-button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            word-wrap: break-word;
+        }
+
+        @media (min-width: 768px) {
+            .result-title {
+                font-size: 2em;
+            }
+        }
+
+        .result-summary {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .result-summary {
+                font-size: 1em;
+            }
+        }
+
+        .result-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #4a90e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            font-size: 0.95em;
+            touch-action: manipulation;
+        }
+
+        @media (min-width: 768px) {
+            .result-link {
+                font-size: 1em;
+            }
+        }
+
+        .result-link:hover {
+            background: #357abd;
+        }
+
+        .result-link:active {
+            transform: scale(0.98);
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 0.95em;
+            color: #888;
+            padding: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .loading {
+                font-size: 1em;
+                padding: 20px;
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #444;
+            border-radius: 2px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .progress-bar {
+                margin-bottom: 20px;
+            }
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4a90e2;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title-screen" id="titleScreen">
+            <h1>What <span class="category-blank" id="categoryBlank">____</span> Are You?</h1>
+            <div class="loading" id="loadingCategories">Loading categories...</div>
+        </div>
+
+        <div class="quiz-screen" id="quizScreen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="question-container" id="questionContainer"></div>
+            <button class="next-button" id="nextButton" disabled>Next Question</button>
+        </div>
+
+        <div class="result-screen" id="resultScreen">
+            <img class="result-image" id="resultImage" style="display: none;">
+            <h2 class="result-title" id="resultTitle"></h2>
+            <p class="result-summary" id="resultSummary"></p>
+            <a class="result-link" id="wikiLink" target="_blank">Read More on Wikipedia</a>
+            <a class="result-link" href="#" id="homeButton">Take Another Quiz</a>
+        </div>
+    </div>
+
+    <script>
+        // TODO: Fill in your questions here
+        // Format: { text: "Question text?", options: ["Option 1", "Option 2", "Option 3", "Option 4"] }
+        const questions = [
+            { text: "How many bees do you think you could reasonably fit in your mouth?", options: ["Zero, I value my life", "3-5 if they're chill about it", "A full handful", "I AM THE BEE KING"] },
+            { text: "If you had to fight a historical figure, who would you choose?", options: ["Gandhi (seems nice)", "Abraham Lincoln (tall but old)", "Napoleon (short king)", "Rasputin (unkillable)"] },
+            { text: "What's your strategy for eating a burrito?", options: ["Architectural precision", "Embrace the chaos", "Deconstruct with fork and knife", "Unhinge jaw like snake"] },
+            { text: "You're legally required to get a face tattoo. What is it?", options: ["Tasteful teardrop", "Comic Sans inspirational quote", "Photorealistic spider", "Just a giant question mark"] },
+            { text: "How do you feel about wet socks?", options: ["Neutral, they're just damp", "Mild discomfort", "Causes physical pain", "I seek them out recreationally"] },
+            { text: "If you could only communicate using one dance move forever, which one?", options: ["The Worm", "Aggressive finger guns", "Interpretive flailing", "Standing perfectly still (bold)"] },
+            { text: "What's your take on cargo shorts?", options: ["Fashion crime", "Practical perfection", "Only ironically", "I'm wearing them right now"] },
+            { text: "You find $5 on the ground. What's your move?", options: ["Take it guiltily", "Leave it (karma)", "Set up a perimeter and investigate", "Eat it to assert dominance"] },
+            { text: "How many eggs could you eat in one sitting if your life depended on it?", options: ["Maybe 3-4", "A dozen, easy", "Two dozen if there's hot sauce", "I don't negotiate with egg terrorists"] },
+            { text: "What's your shower singing voice like?", options: ["Grammy-worthy", "Enthusiastic screaming", "Death metal growls", "Complete silence (psychopath)"] },
+            { text: "If you had to eat at only one fast food chain forever, which one?", options: ["McDonald's (classic)", "Taco Bell (brave)", "Subway (health-conscious liar)", "Gas station hot dogs (chaos agent)"] },
+            { text: "How do you feel about mayonnaise?", options: ["It's fine", "Best condiment", "Literal war crime", "I put it on cereal"] },
+            { text: "What's your ideal number of pillows?", options: ["1-2 (minimalist)", "3-4 (reasonable)", "5-7 (pillow enthusiast)", "Bed is 80% pillows"] },
+            { text: "You're trapped in an elevator with a mime. What do you do?", options: ["Respect the bit", "Try to make them talk", "Out-mime them", "Fake a heart attack"] },
+            { text: "How often do you think about the Roman Empire?", options: ["Never", "Once a month", "Weekly", "It's all I think about"] },
+            { text: "What's your relationship with geese?", options: ["Respectful distance", "Fear and loathing", "I could take one in a fight", "We have an understanding"] },
+            { text: "If you could only eat foods that are one color for the rest of your life, which color?", options: ["Brown (chocolate, meat)", "Green (health)", "Yellow (carbs forever)", "Clear (water and sadness)"] },
+            { text: "How many times have you pretended to wash your hands?", options: ["Never, I'm civilized", "Maybe once or twice", "More than I'd admit", "What's washing hands?"] },
+            { text: "You have to get a very specific phobia. Which one?", options: ["Fear of odd numbers", "Fear of palindromes", "Fear of purple things", "Fear of Tuesdays"] },
+            { text: "What's your honest relationship with ketchup?", options: ["Normal condiment use", "Goes on everything", "Hasn't touched it since age 8", "I drink it from the bottle"] },
+            { text: "If you had to become a cryptid, which one?", options: ["Bigfoot (classic)", "Mothman (mysterious)", "Loch Ness Monster (aquatic)", "Chupacabra (aggressive)"] },
+            { text: "How do you eat corn on the cob?", options: ["Typewriter method", "Circular rotation", "Cut it off (coward)", "Just bite into it whole"] },
+            { text: "What's your take on socks with sandals?", options: ["Fashion emergency", "Peak comfort", "Only at home", "Power move in public"] },
+            { text: "You can only watch one movie for the rest of your life. What genre?", options: ["90s action movie", "Obscure foreign film", "Shrek (any of them)", "Home videos of yourself"] },
+            { text: "How many rubber ducks is too many rubber ducks?", options: ["More than 3", "More than 20", "More than 100", "No such thing"] },
+            { text: "What's your honest opinion on pigeons?", options: ["Rats with wings", "Underrated birds", "Neutral existence", "I am their leader"] },
+            { text: "If you had to fight 100 duck-sized horses or 1 horse-sized duck, which?", options: ["100 tiny horses (manageable)", "1 giant duck (fewer targets)", "Neither (smart)", "Both at once (chaos)"] },
+            { text: "How do you feel about clowns?", options: ["Mild amusement", "Slight discomfort", "Genuine terror", "I am one"] },
+            { text: "What's your strategy for eating spaghetti?", options: ["Twirl elegantly", "Cut it up (blasphemy)", "Slurp aggressively", "Hands only"] },
+            { text: "You have to get one weird skill. Which one?", options: ["Juggling chainsaws", "Yodeling", "Professional whistling", "Competitive eating"] },
+            { text: "How many hot dogs is too many hot dogs in one sitting?", options: ["More than 2", "More than 5", "More than 10", "Cowards' question"] },
+            { text: "What's your relationship with squirrels?", options: ["They're cute", "Bushy-tailed menace", "Worthy adversaries", "We have a pact"] },
+            { text: "If you could only wear one outfit for the rest of your life, what style?", options: ["Business casual", "Pajamas", "Full medieval armor", "Birthday suit"] },
+            { text: "How do you eat a Kit Kat?", options: ["Break it apart properly", "Bite it whole (monster)", "Eat it sideways", "Blend it into a smoothie"] },
+            { text: "What's your honest take on the moon landing?", options: ["Happened, obviously", "Fake (but entertaining)", "Multiple landings, all fake", "Moon isn't real"] },
+            { text: "You can only smell like one food forever. Which one?", options: ["Fresh bread", "Bacon", "Coffee", "Durian"] },
+            { text: "How many push-ups can you do right now?", options: ["0-5 (honest)", "10-20 (optimistic)", "50+ (liar)", "Push-ups do me"] },
+            { text: "What's your relationship with spiders?", options: ["Live and let live", "Catch and release", "Immediate destruction", "We're roommates"] },
+            { text: "If you had to eat soup for every meal, which soup?", options: ["Chicken noodle", "Tomato", "Potato", "Ice cream (technically)"] },
+            { text: "How do you feel about pickles?", options: ["Love them", "Tolerate them", "Remove immediately", "I am one"] },
+            { text: "What's your ideal number of cats?", options: ["0-1 (reasonable)", "2-3 (cat person)", "5-10 (concerning)", "Lost count"] },
+            { text: "You can only use one emoji for the rest of your life. Which?", options: ["😂 (basic)", "🗿 (mysterious)", "🦆 (specific)", "💀 (edgy)"] },
+            { text: "How many grapes could you catch in your mouth consecutively?", options: ["0-2 (realistic)", "3-5 (confident)", "10+ (delusional)", "I throw, not catch"] },
+            { text: "What's your take on pineapple on pizza?", options: ["Delicious", "Acceptable", "War crime", "I put it on everything"] },
+            { text: "If you had to become a piece of furniture, which one?", options: ["Comfortable chair", "Mysterious ottoman", "Aggressive lamp", "That one weird decorative bowl"] },
+            { text: "How do you feel about the word 'moist'?", options: ["It's fine", "Slightly uncomfortable", "Physically repulsive", "Favorite word"] },
+            { text: "What's your strategy for eating Oreos?", options: ["Dunk in milk", "Twist and lick", "Whole cookie bite", "Deconstruct completely"] },
+            { text: "You can only listen to one sound for the rest of your life. Which?", options: ["Ocean waves", "White noise", "Dial-up internet", "Screaming"] },
+            { text: "How many marshmallows could you fit in your mouth?", options: ["5-10 (normal)", "15-20 (trying)", "30+ (concerning)", "None, I'm not a child"] },
+            { text: "What's your honest opinion on Crocs?", options: ["Fashion disaster", "Comfortable blasphemy", "Acceptable at home", "Peak footwear"] },
+            { text: "If you had to fight a muppet, which one?", options: ["Elmo (manageable)", "Kermit (sorry)", "Animal (death wish)", "Oscar (home advantage)"] },
+            { text: "How do you eat a banana?", options: ["Peel from stem", "Peel from bottom", "Bite through peel", "Blend everything"] },
+            { text: "What's your relationship with birds?", options: ["They're nice", "Government drones", "Worthy opponents", "I speak to them"] },
+            { text: "You can only drink one beverage forever. Which?", options: ["Water (smart)", "Coffee (addicted)", "Mountain Dew (chaos)", "Pickle juice (unhinged)"] },
+            { text: "How many times have you Googled yourself?", options: ["Never", "Once or twice", "Monthly check", "I have alerts set up"] },
+            { text: "What's your take on olives?", options: ["Delicious", "Acceptable garnish", "Salty nightmare", "I am an olive"] },
+            { text: "If you could only communicate in movie quotes, which movie?", options: ["The Godfather", "Mean Girls", "Shrek", "Bee Movie"] },
+            { text: "How do you feel about mushrooms?", options: ["Love them", "They're okay", "Texture nightmare", "I am a fun guy"] },
+            { text: "What's your honest relationship with wasps?", options: ["Respectful fear", "Pure hatred", "We coexist", "They fear me"] },
+            { text: "You can only wear one color for the rest of your life. Which?", options: ["Black (safe)", "Neon green (bold)", "Brown (earthy)", "Plaid (not a color)"] },
+            { text: "How many chicken nuggets could you eat in one sitting?", options: ["10-15 (normal)", "20-30 (trying)", "50+ (competitive)", "I don't stop"] },
+            { text: "What's your strategy for eating tacos?", options: ["Careful precision", "Accept the mess", "Fork and knife", "Taco salad (coward)"] },
+            { text: "You can only have one superpower but it's useless. Which?", options: ["Microwave vision", "Can fly 2 inches off ground", "Turn water into slightly warmer water", "Communicate with plants (they hate you)"] },
+            { text: "How do you feel about cilantro?", options: ["Delicious herb", "Tolerable", "Soap flavor", "I crave it"] },
+            { text: "What's your ideal temperature for room temperature?", options: ["68°F (correct)", "72°F (warm)", "65°F (cold)", "90°F (psychopath)"] },
+            { text: "You can only eat bread in one form. Which?", options: ["Sandwich bread", "Baguette", "Tortilla", "Bread pills"] },
+            { text: "How many cups of coffee is too many?", options: ["More than 2", "More than 5", "More than 10", "I am coffee"] },
+            { text: "What's your take on raisins?", options: ["Nature's candy", "Acceptable in cookies", "Grape betrayal", "I collect them"] },
+            { text: "If you could only say one phrase for the rest of your life, what?", options: ["Hello", "What?", "I plead the fifth", "AAAAAAHHHHH"] },
+            { text: "How do you feel about seagulls?", options: ["Beach birds", "Food thieves", "Sky rats", "Misunderstood creatures"] },
+            { text: "You have to eat cereal one weird way. Which?", options: ["With water", "With orange juice", "Dry, then drink milk", "Just eat bowl"] },
+            { text: "What's your relationship with dolphins?", options: ["Smart and friendly", "Overrated", "Ocean menace", "We're the same"] },
+            { text: "You can only walk in one specific way. Which?", options: ["Normal walking", "Power walking", "Crab walk", "Backwards only"] },
+            { text: "How many pancakes could you stack on your head?", options: ["2-3 (realistic)", "5-7 (trying)", "10+ (ambitious)", "Why would I?"] },
+            { text: "What's your honest opinion on candy corn?", options: ["Halloween classic", "Acceptable once a year", "Waxy nightmare", "Year-round snack"] },
+            { text: "If you could only own one type of shoe, which?", options: ["Sneakers", "Crocs", "Stilettos", "Ski boots"] },
+            { text: "How do you feel about the phrase 'yeet'?", options: ["Valid verb", "Dead meme", "Still funny", "I don't know what that is"] },
+            { text: "What's your strategy for eating chips?", options: ["One at a time", "Handful", "Crush and snort", "Make chip sandwich"] },
+            { text: "You can only say numbers in one accent. Which?", options: ["Boston", "French", "Robot", "Screaming"] },
+            { text: "How many jellybeans is too many jellybeans?", options: ["More than 20", "More than 50", "More than 100", "Never enough"] },
+            { text: "What's your take on butterflies?", options: ["Beautiful insects", "Flying flowers", "Creepy when you think about it", "Tastiest bug"] },
+            { text: "If you had to be a kitchen appliance, which?", options: ["Toaster", "Blender", "Microwave", "That one weird drawer"] },
+            { text: "How do you feel about the word 'slacks'?", options: ["Normal word", "Old-fashioned", "Uncomfortable", "I say it daily"] },
+            { text: "What's your ideal ratio of cheese to pasta?", options: ["25% cheese", "50% cheese", "75% cheese", "Just cheese with pasta garnish"] },
+            { text: "You can only high-five one way. Which?", options: ["Normal high-five", "Aggressive slap", "Miss completely", "Full-body collision"] },
+            { text: "How many times have you walked into a glass door?", options: ["Never", "Once (embarrassing)", "Multiple times", "I only walk into glass doors"] },
+            { text: "What's your relationship with raccoons?", options: ["Trash pandas", "Respect from afar", "Worthy adversaries", "We're cousins"] },
+            { text: "If you could only eat vegetables raw, which one?", options: ["Carrots", "Broccoli", "Potato (brave)", "None (scurvy gang)"] },
+            { text: "How do you feel about fruitcake?", options: ["Holiday classic", "Tolerable", "Doorstop material", "Gourmet treat"] },
+            { text: "What's your strategy for drinking soup?", options: ["Spoon it properly", "Sip from bowl", "Drink through straw", "IV drip"] },
+            { text: "You can only wear one hat style. Which?", options: ["Baseball cap", "Cowboy hat", "Top hat", "Traffic cone"] },
+            { text: "How many times do you hit snooze?", options: ["0 (disciplined)", "1-2 (normal)", "5+ (problem)", "I am snooze"] },
+            { text: "What's your take on licorice?", options: ["Delicious", "Black vs red debate", "Rubber candy", "I hoard it"] },
+            { text: "If you had to communicate only through interpretive dance, which style?", options: ["Ballet", "Hip-hop", "Aggressive thrashing", "Complete stillness"] },
+            { text: "How do you feel about pennies?", options: ["Valid currency", "Basically worthless", "Hoard them", "Eat them"] },
+            { text: "What's your relationship with moths?", options: ["Neutral coexistence", "Dusty butterflies", "Lamp enthusiasts", "My friends"] },
+            { text: "You can only eat sandwiches cut one way. Which?", options: ["Diagonal", "Straight down middle", "No cut", "Into 47 pieces"] },
+            { text: "How many rubber bands could you put around your head?", options: ["5-10", "20-30", "50+", "I don't have a head"] },
+            { text: "What's your honest opinion on fanny packs?", options: ["Fashion mistake", "Practical comeback", "Always acceptable", "Part of my body"] },
+            { text: "If you could only sneeze one way, which?", options: ["Normal sneeze", "Dad sneeze", "Held-in sneeze", "Full-body explosion"] },
+            { text: "How do you feel about the moon?", options: ["It's fine", "Romantic", "Fake", "I miss it"] },
+            { text: "What's your strategy for opening a jar?", options: ["Use grip strength", "Tap lid on counter", "Hot water", "Scream at it"] },
+            { text: "You can only laugh one way. Which?", options: ["Normal laugh", "Evil villain laugh", "Silent wheeze", "Aggressive honking"] },
+            { text: "How many Band-Aids is too many Band-Aids on one person?", options: ["More than 3", "More than 10", "More than 50", "I am Band-Aids"] },
+            { text: "What's your take on bell peppers?", options: ["Crunchy and good", "Acceptable cooked", "Bitter nightmare", "I wear them as hats"] },
+            { text: "If you had to be a specific type of cheese, which?", options: ["Cheddar (classic)", "Swiss (holy)", "Blue cheese (stinky)", "Spray cheese (chaos)"] },
+            { text: "How do you feel about elevator music?", options: ["Soothing", "Annoying", "Best music genre", "I compose it"] },
+            { text: "What's your ideal number of blankets?", options: ["1 (normal)", "2-3 (cozy)", "5+ (nest)", "Buried alive"] },
+            { text: "You can only point in one direction. Which?", options: ["Up", "Down", "At people (rude)", "Inward (introspective)"] },
+            { text: "How many pennies would you pick up off the ground?", options: ["All of them", "Only if heads up", "Only if > $1", "I put pennies down"] },
+            { text: "What's your relationship with turtles?", options: ["Slow and steady", "Shell enthusiast", "Radical (TMNT)", "We race"] },
+            { text: "If you could only eat fruit one way, which?", options: ["Fresh and whole", "Smoothie form", "Dried", "Candied"] },
+            { text: "How do you feel about the word 'pantaloons'?", options: ["Old-timey", "Makes me laugh", "Valid pants word", "I say it exclusively"] },
+            { text: "What's your strategy for eating ice cream?", options: ["Lick cone carefully", "Bite it (psychopath)", "Let it melt first", "Blend and drink"] },
+            { text: "You can only walk on one surface. Which?", options: ["Solid ground", "Sand always", "Ice everywhere", "Lava (brave)"] },
+            { text: "How many Post-it notes is too many Post-it notes?", options: ["More than 20", "More than 100", "More than 1000", "Never enough"] },
+            { text: "What's your take on avocados?", options: ["Creamy perfection", "Overpriced", "Texture nightmare", "I bathe in guacamole"] },
+            { text: "If you had to become a specific cloud type, which?", options: ["Cumulus (fluffy)", "Cirrus (wispy)", "Cumulonimbus (dramatic)", "Smog (edgy)"] },
+            { text: "How do you feel about pigeons in hats?", options: ["Adorable", "Confusing", "Fashion forward", "I make the hats"] },
+            { text: "What's your ideal number of fingers?", options: ["10 (standard)", "8 (streamlined)", "12 (ambitious)", "40 (spider hands)"] },
+            { text: "You can only express excitement one way. Which?", options: ["Normal 'yay'", "Air horn sound", "Backflip", "Scream 'TAXATION IS THEFT'"] },
+            { text: "How many oranges could you juggle?", options: ["0 (honest)", "2-3 (trying)", "5+ (liar)", "I don't juggle, I throw"] },
+            { text: "What's your relationship with whales?", options: ["Majestic creatures", "Too big", "We're related", "I am whale"] },
+            { text: "If you could only sing one song, which?", options: ["Happy Birthday", "National Anthem", "Tequila", "Screaming 'AAAAH'"] },
+            { text: "How do you feel about the color beige?", options: ["Neutral and calm", "Boring", "Peak aesthetic", "I bleed beige"] },
+            { text: "What's your strategy for opening a bag of chips?", options: ["Carefully along seam", "Rip savagely", "Scissors (civilized)", "Eat through bag"] },
+            { text: "You can only blink at one speed. Which?", options: ["Normal blinking", "Extremely slow", "Rapid flutter", "Never blink"] },
+            { text: "How many pencils could you balance on your nose?", options: ["0 (realistic)", "1 (maybe)", "3+ (lies)", "I am the pencil"] },
+            { text: "What's your take on cauliflower?", options: ["Versatile vegetable", "White broccoli", "Texture crime", "I collect varieties"] },
+            { text: "If you had to be a specific dinosaur, which?", options: ["T-Rex (classic)", "Triceratops (horny)", "Pterodactyl (flappy)", "Barney (purple)"] },
+            { text: "How do you feel about the word 'slurp'?", options: ["Accurate onomatopoeia", "Uncomfortable", "Beautiful word", "I legally changed my name to it"] },
+            { text: "What's your ideal width of spaghetti?", options: ["Angel hair (thin)", "Regular (normal)", "Fettuccine (thick)", "Lasagna (bold)"] },
+            { text: "You can only hop on one foot. Which foot?", options: ["Left", "Right", "Both (not hopping)", "Third foot"] },
+            { text: "How many kazoos is too many kazoos?", options: ["More than 1", "More than 5", "More than 20", "No limit"] },
+            { text: "What's your relationship with octopi?", options: ["Eight-armed wonder", "Scary smart", "Delicious", "We're pen pals"] },
+            { text: "If you could only wear one pattern, which?", options: ["Stripes", "Polka dots", "Plaid", "Holographic everything"] },
+            { text: "How do you feel about the word 'flabbergasted'?", options: ["Great word", "Too long", "Use it daily", "I am flabbergasted"] },
+            { text: "What's your strategy for eating chicken wings?", options: ["Nibble carefully", "Full commitment", "Fork and knife (coward)", "Swallow whole"] },
+            { text: "You can only nod your head at one speed. Which?", options: ["Normal nod", "Very slow", "Bobblehead speed", "Vigorous headbanging"] },
+            { text: "How many staplers is a reasonable amount to own?", options: ["1-2", "3-5", "10+", "I am stapler"] },
+            { text: "What's your take on Brussels sprouts?", options: ["Misunderstood vegetable", "Baby cabbages", "Bitter spheres", "I grow them in my hair"] },
+            { text: "If you had to be a specific type of pasta sauce, which?", options: ["Marinara (classic)", "Alfredo (creamy)", "Pesto (green)", "Straight butter"] },
+            { text: "How do you feel about the word 'kumquat'?", options: ["Funny fruit name", "Valid word", "Makes me giggle", "My nickname"] },
+            { text: "What's your ideal amount of bubble wrap?", options: ["None needed", "A little for packaging", "Room full", "House made of it"] },
+            { text: "You can only do one hand gesture. Which?", options: ["Thumbs up", "Peace sign", "Finger guns", "Jazz hands"] },
+            { text: "How many rubber chickens is a normal amount to own?", options: ["0", "1 (classic)", "5-10", "Lost count"] },
+            { text: "What's your relationship with salamanders?", options: ["Cute amphibians", "Tiny dragons", "Fire proof", "We share a lease"] },
+            { text: "If you could only eat at one specific booth in a diner, which?", options: ["Window seat", "Corner booth", "Counter", "Kitchen floor"] },
+            { text: "How do you feel about the word 'plethora'?", options: ["Fancy word", "Too fancy", "Use appropriately", "I have a plethora of plethoras"] },
+            { text: "What's your strategy for eating corn dogs?", options: ["Stick stays in", "Remove stick", "Eat stick first", "Everything goes"] },
+            { text: "You can only wave at one intensity. Which?", options: ["Small hand wave", "Big enthusiastic", "Aggressive flapping", "Just staring"] },
+            { text: "How many harmonicas could you play at once?", options: ["1 (realistic)", "2-3 (trying)", "5+ (ambitious)", "I am harmonica"] },
+            { text: "What's your take on Brussels sprouts' PR problem?", options: ["They're fine", "Victim of bad cooking", "Deserve the hate", "I'm their publicist"] },
+            { text: "If you had to be furniture in a waiting room, which?", options: ["Uncomfortable chair", "Magazine rack", "Fish tank", "Anxiety itself"] },
+            { text: "How do you feel about competitive eating?", options: ["Impressive sport", "Concerning", "My calling", "I am the food"] },
+            { text: "What's your ideal amount of garlic?", options: ["A clove or two", "More than recipe says", "Entire bulb minimum", "Vampire-deterring amounts"] },
+            { text: "You can only say hello in one language. Which?", options: ["English", "Spanish", "Dolphin", "Screaming"] },
+            { text: "How many garden gnomes is too many?", options: ["More than 3", "More than 20", "More than 100", "They're never gnome"] },
+            { text: "What's your relationship with flamingos?", options: ["Pink birds", "Balanced masters", "Lawn ornament goals", "We migrate together"] },
+            { text: "If you could only eat soup at one temperature, which?", options: ["Piping hot", "Warm", "Room temperature", "Ice cold gazpacho"] },
+            { text: "How do you feel about the phrase 'moist towelette'?", options: ["Practical item", "Uncomfortable words", "Makes me laugh", "Poetry"] },
+            { text: "What's your strategy for eating a cupcake?", options: ["Top first", "Bottom first", "Sandwich method", "Unhinge jaw"] },
+            { text: "You can only use one adjective. Which?", options: ["Good", "Cromulent", "Moist", "AAAAAAAA"] },
+            { text: "How many googly eyes is too many for one object?", options: ["More than 2", "More than 10", "More than 100", "Everything needs more"] },
+            { text: "What's your take on velociraptors?", options: ["Scary dinosaurs", "Feathered friends", "Size is disappointing", "I have one"] },
+            { text: "If you had to be a specific type of lettuce, which?", options: ["Iceberg (classic)", "Romaine (nutritious)", "Arugula (fancy)", "Cabbage (rebel)"] },
+            { text: "How do you feel about air quotes?", options: ["Useful punctuation", "Overused", "Do them constantly", "I 'don't' 'understand'"] },
+            { text: "What's your ideal number of toes?", options: ["10 (standard)", "8 (streamlined)", "12 (extra balance)", "None (smooth)"] },
+            { text: "You can only eat pizza at one time of day. Which?", options: ["Dinner", "Lunch", "Breakfast", "3:47 AM only"] },
+            { text: "How many whoopee cushions is a responsible amount?", options: ["0 (mature)", "1-2 (classic)", "10+", "House is cushions"] },
+            { text: "What's your relationship with penguins?", options: ["Cute birds", "Tuxedo chickens", "Ice masters", "We waddle as one"] },
+            { text: "If you could only use one spice, which?", options: ["Salt", "Pepper", "Cinnamon", "Sadness"] },
+            { text: "How do you feel about the word 'gazebo'?", options: ["Fancy structure", "Fun to say", "Use it wrong on purpose", "I live in one"] },
+            { text: "What's your strategy for eating popcorn?", options: ["Handful at a time", "Individual kernels", "Dump in mouth", "Snort it"] },
+            { text: "You can only own one color of socks. Which?", options: ["Black", "White", "Crazy patterns", "No socks ever"] },
+            { text: "How many lawn flamingos would you put in someone's yard at night?", options: ["0 (law-abiding)", "10-20 (statement)", "100+ (invasion)", "I am the flamingo"] },
+            { text: "What's your take on snails?", options: ["Slow and steady", "Land mermaids", "Too slimy", "Racing champions"] },
+            { text: "If you had to be a specific board game piece, which?", options: ["Top hat (Monopoly)", "Thimble (practical)", "Race car (fast)", "The board itself"] },
+            { text: "How do you feel about synchronized swimming?", options: ["Impressive skill", "Confusing sport", "My calling", "I do it alone"] },
+            { text: "What's your ideal density of a pillow?", options: ["Soft and fluffy", "Medium firm", "Rock solid", "Liquid"] },
+            { text: "You can only wear one type of shoe material. Which?", options: ["Leather", "Canvas", "Rubber", "Bread"] },
+            { text: "How many party hats is too many to wear at once?", options: ["More than 1", "More than 5", "More than 20", "Not enough"] },
+            { text: "What's your relationship with narwhals?", options: ["Unicorns of the sea", "Horned dolphins", "Mystical", "We joust"] },
+            { text: "If you could only eat vegetables in one form, which?", options: ["Raw", "Steamed", "Deep fried", "Pill form"] },
+            { text: "How do you feel about yodeling?", options: ["Alpine tradition", "Strange art", "Peak communication", "Only way I talk"] },
+            { text: "What's your strategy for eating fondue?", options: ["Careful dipping", "Aggressive stabbing", "Drink it", "Bathe in it"] },
+            { text: "You can only sit in one position. Which?", options: ["Normal sitting", "Criss-cross", "Standing (rebel)", "Full split"] },
+            { text: "How many wind chimes is too many?", options: ["More than 2", "More than 10", "More than 50", "Neighborhood of chimes"] },
+            { text: "What's your take on beavers?", options: ["Dam builders", "Nature engineers", "Flat-tailed friends", "Construction rivals"] },
+            { text: "If you had to become a specific kitchen utensil, which?", options: ["Spatula", "Whisk", "Garlic press", "That weird thing in the drawer"] },
+            { text: "How do you feel about theme parks?", options: ["Fun adventure", "Overpriced", "Best place on earth", "I live in one"] },
+            { text: "What's your ideal amount of fringe on clothing?", options: ["None", "A little", "Moderate", "Full cowboy"] },
+            { text: "You can only eat cereal at one temperature. Which?", options: ["Cold", "Room temperature", "Warm", "Frozen solid"] },
+            { text: "How many rubber duckies is a reasonable bathtub amount?", options: ["1-3", "5-10", "20+", "I am rubber ducky"] },
+            { text: "What's your relationship with platypuses?", options: ["Weird mammals", "Nature's experiment", "Venomous friends", "Related somehow"] },
+            { text: "If you could only drink from one vessel type, which?", options: ["Normal cup", "Straw only", "Wine glass", "Cupped hands"] },
+            { text: "How do you feel about interpretive dance?", options: ["Valid art form", "Confusing", "Only communication method", "I interpret everything"] },
+            { text: "What's your strategy for eating sushi?", options: ["Chopsticks properly", "Fork (coward)", "Hands", "Whole roll at once"] },
+            { text: "You can only wear one pattern of underwear. Which?", options: ["Solid colors", "Stripes", "Cartoon characters", "None (free spirit)"] },
+            { text: "How many throw pillows is too many?", options: ["More than 3", "More than 10", "More than 50", "Bed is 90% pillows"] },
+            { text: "What's your take on hedgehogs?", options: ["Spiky friends", "Portable cacti", "Fast runners", "We're colleagues"] },
+            { text: "If you had to be a specific sandwich, which?", options: ["PB&J (classic)", "Club (fancy)", "Grilled cheese (comfort)", "Knuckle (fighter)"] },
+            { text: "How do you feel about Renaissance fairs?", options: ["Fun historical fun", "Weird", "My natural habitat", "I never left"] },
+            { text: "What's your ideal number of ice cubes?", options: ["2-3", "5-7", "10+", "Just ice"] },
+            { text: "You can only exit a room in one way. Which?", options: ["Walk out normally", "Backwards", "Cartwheel", "Spontaneously combust"] },
+            { text: "How many traffic cones is too many to own?", options: ["More than 1", "More than 10", "More than 100", "I am traffic cone"] },
+            { text: "What's your relationship with alpacas?", options: ["Fluffy llamas", "Spitting experts", "Wool providers", "We share fashion tips"] },
+            { text: "If you could only eat dessert at one specific time, which?", options: ["After dinner", "Before dinner (rebel)", "Midnight", "Sunrise"] },
+            { text: "How do you feel about bagpipes?", options: ["Cultural instrument", "Aggressive sound", "Peak music", "I play them constantly"] },
+            { text: "What's your strategy for eating nachos?", options: ["Strategic chip selection", "Top layer only", "Full excavation", "Blend into soup"] },
+            { text: "You can only have one facial expression. Which?", options: ["Neutral", "Slight smile", "Concerned", "Unreasonable joy"] },
+            { text: "How many kazoos could you fit in a shoebox?", options: ["10-20", "50-75", "100+", "I don't use shoeboxes"] },
+            { text: "What's your take on capybaras?", options: ["Chill animals", "Giant guinea pigs", "Friendship experts", "I am capybara"] },
+            { text: "If you had to be a specific type of door, which?", options: ["Standard door", "Revolving door", "Automatic sliding", "Trap door"] },
+            { text: "How do you feel about professional whistling?", options: ["Impressive skill", "Weird career", "My dream", "I whistle exclusively"] },
+            { text: "What's your ideal amount of glitter?", options: ["None", "Subtle accent", "Moderate coverage", "Everything is glitter"] },
+            { text: "You can only celebrate one holiday. Which?", options: ["Christmas", "Halloween", "Arbor Day", "Fake holiday I invented"] },
+            { text: "How many swim floaties is too many for one person?", options: ["More than 2", "More than 10", "More than 50", "I am flotation"] },
+            { text: "What's your relationship with axolotls?", options: ["Cute salamanders", "Water puppies", "Regeneration goals", "We're twins"] },
+            { text: "If you could only eat at one fast food restaurant's parking lot, which?", options: ["McDonald's", "Taco Bell", "Wendy's", "Arby's (brave)"] },
+            { text: "How do you feel about competitive cup stacking?", options: ["Impressive sport", "Weird skill", "My calling", "I am the cups"] },
+            { text: "What's your strategy for eating a quesadilla?", options: ["Triangle slices", "Roll it up", "Fork and knife", "Full disc bite"] },
+            { text: "You can only own one kitchen appliance. Which?", options: ["Microwave", "Toaster", "Blender", "Easy-Bake Oven"] },
+            { text: "How many coconuts could you carry at once?", options: ["2-3", "5-7", "10+", "What's a coconut?"] },
+            { text: "What's your take on meerkats?", options: ["Lookout experts", "Desert dogs", "Standing champions", "We have meetings"] },
+            { text: "If you had to be a specific type of weather, which?", options: ["Sunny", "Rainy", "Tornado", "That weird humid fog"] },
+            { text: "How do you feel about medieval torture devices?", options: ["Historical artifacts", "Concerning", "Interior design", "I collect them casually"] },
+            { text: "What's your ideal number of buttons on a shirt?", options: ["5-7 (normal)", "10+ (fancy)", "0 (pullover)", "1 giant button"] },
+            { text: "You can only eat sandwiches with one number of ingredients. Which?", options: ["3 (simple)", "7 (balanced)", "15+ (loaded)", "1 (sad)"] },
+            { text: "How many harmonicas could you fit in your pockets?", options: ["2-3", "5-10", "20+", "No pockets, just harmonicas"] },
+            { text: "What's your relationship with wombats?", options: ["Cube poop creators", "Underground experts", "Adorable tanks", "We share a den"] },
+            { text: "If you could only eat food from one decade, which?", options: ["1950s", "1980s", "2000s", "Medieval times"] },
+            { text: "How do you feel about vuvuzelas?", options: ["Annoying", "Cultural instrument", "Peak sound", "I own seventeen"] },
+            { text: "What's your strategy for eating a banana split?", options: ["Section by section", "Mix it all together", "Ice cream only", "Drink it"] },
+            { text: "You can only use one type of bag. Which?", options: ["Backpack", "Tote bag", "Plastic grocery bag", "Pillowcase"] },
+            { text: "How many lawn ornaments is too many?", options: ["More than 5", "More than 20", "More than 100", "Lawn is ornaments"] },
+            { text: "What's your take on manatees?", options: ["Sea cows", "Gentle giants", "Boat speed bumps", "We float together"] },
+            { text: "If you had to be a specific type of hat, which?", options: ["Baseball cap", "Sombrero", "Tiny top hat", "Traffic cone"] },
+            { text: "How do you feel about competitive eating competitions?", options: ["Impressive", "Concerning", "My future", "I judge them"] },
+            { text: "What's your ideal amount of hot sauce?", options: ["A drop", "Liberal application", "Bottle per meal", "IV drip"] },
+            { text: "You can only make one animal sound. Which?", options: ["Dog bark", "Cat meow", "Elephant trumpet", "Whale song"] },
+            { text: "How many juggling balls is too many to try?", options: ["More than 3", "More than 5", "More than 10", "I don't juggle"] },
+            { text: "What's your relationship with sloths?", options: ["Slow friends", "My spirit animal", "Speed demons", "We hang together"] },
+            { text: "If you could only communicate using car horn honks, how many honk patterns?", options: ["3 patterns", "10 patterns", "Morse code", "One long scream"] },
+            { text: "How do you feel about the word 'discombobulated'?", options: ["Great word", "Too long", "Me currently", "I cause it"] },
+            { text: "What's your strategy for eating a burrito bowl?", options: ["Mix everything", "Layer by layer", "Just eat tortilla", "Turn into burrito anyway"] },
+            { text: "You can only wear one type of pants. Which?", options: ["Jeans", "Sweatpants", "Cargo shorts year-round", "No pants (bold)"] },
+            { text: "How many pool noodles is a reasonable amount?", options: ["2-3", "10-15", "50+", "I am pool noodle"] },
+            { text: "What's your take on lemurs?", options: ["Striped tails", "Tree bouncers", "Party animals", "We're related"] },
+            { text: "If you had to eat only foods that start with one letter, which letter?", options: ["P (pizza, pasta)", "C (cheese, chocolate)", "B (bread, burrito)", "Q (quinoa, quesadilla)"] },
+            { text: "How do you feel about Gregorian chants?", options: ["Historical music", "Spooky vibes", "Peak music", "My ringtone"] },
+            { text: "What's your ideal number of decorative spoons?", options: ["0 (normal)", "5-10 (collection)", "50+ (obsessed)", "I am spoon"] },
+            { text: "You can only respond to questions with one phrase. Which?", options: ["Yes", "Perhaps", "Define question", "Screaming"] },
+            { text: "How many pool floaties is too many for one person?", options: ["More than 3", "More than 10", "More than 50", "I am flotation device"] },
+            { text: "What's your relationship with ferrets?", options: ["Noodle cats", "Sock thieves", "Tube experts", "We're roommates"] },
+            { text: "If you could only eat at one specific table height, which?", options: ["Standard height", "Coffee table", "Bar height", "Floor"] },
+            { text: "How do you feel about dubstep?", options: ["Good music", "Too much wobble", "Peak art form", "I am the drop"] },
+            { text: "What's your strategy for eating corn flakes?", options: ["Quickly before soggy", "Let them sog", "Dry handful", "Snort them"] },
+            { text: "You can only greet people one way. Which?", options: ["Wave", "Finger guns", "Full bow", "Interpretive dance"] },
+            { text: "How many extension cords is a fire hazard?", options: ["More than 3", "More than 10", "More than 50", "I eat electricity"] },
+            { text: "What's your take on binturongs?", options: ["Bearcat thing", "Popcorn smelling", "Tree dwellers", "Never heard of them"] },
+            { text: "If you had to be a specific breakfast food, which?", options: ["Pancakes", "Eggs", "Toast", "Coffee beans"] },
+            { text: "How do you feel about the word 'balderdash'?", options: ["Old-timey", "Fun to say", "Use it daily", "I am balderdash"] },
+            { text: "What's your ideal amount of salsa on chips?", options: ["Light dip", "Generous scoop", "Drowning", "Just drink salsa"] },
+            { text: "You can only own furniture in one color. Which?", options: ["Brown wood", "Black", "Hot pink", "Clear"] },
+            { text: "How many paper clips could you make a chain with?", options: ["10-20", "50-100", "500+", "I am the chain"] },
+            { text: "What's your relationship with armadillos?", options: ["Armored friends", "Road hazards", "Rolly polly", "We share armor"] },
+            { text: "If you could only eat desserts shaped like one thing, what shape?", options: ["Circles", "Squares", "Animals", "My face"] },
+            { text: "How do you feel about steel drums?", options: ["Island vibes", "Limited range", "Peak instrument", "I play them at 3 AM"] },
+            { text: "What's your strategy for eating mashed potatoes?", options: ["Spoon it up", "Make a volcano", "Drink it", "Sculpt with it"] },
+            { text: "You can only wear one type of socks pattern. Which?", options: ["Solid", "Stripes", "Polka dots", "Faces of celebrities"] },
+            { text: "How many bubble wands is too many?", options: ["More than 2", "More than 10", "More than 100", "Everything is bubbles"] },
+            { text: "What's your take on aye-ayes?", options: ["Weird lemurs", "Long finger gang", "Nightmare fuel", "We're besties"] },
+            { text: "If you had to be a specific vegetable, which?", options: ["Carrot", "Broccoli", "Potato", "Pickle (technically fruit)"] },
+            { text: "How do you feel about yodeling competitions?", options: ["Impressive", "Too loud", "My calling", "I organize them"] },
+            { text: "What's your ideal amount of frosting on a cake?", options: ["Thin layer", "Normal amount", "Extra thick", "Cake is frosting vessel"] },
+            { text: "You can only drink beverages at one specific temperature. Which?", options: ["Ice cold", "Room temp", "Hot", "Frozen solid"] },
+            { text: "How many kaleidoscopes is a normal amount to own?", options: ["0-1", "2-5", "10+", "I see kaleidoscope"] },
+            { text: "What's your relationship with tarantulas?", options: ["Scary spiders", "Fuzzy friends", "Respect from distance", "We're pen pals"] },
+            { text: "If you could only eat pasta in one shape, which?", options: ["Spaghetti", "Shells", "Wheels", "Uncooked brick"] },
+            { text: "How do you feel about accordion music?", options: ["Folk tradition", "Annoying squeeze", "Peak sound", "I squeeze professionally"] },
+            { text: "What's your strategy for eating a soft pretzel?", options: ["Bite by bite", "Untwist it", "Dunk in cheese", "Swallow whole"] },
+            { text: "You can only point with one finger. Which?", options: ["Index", "Middle (rude)", "Pinky (fancy)", "Thumb (wrong)"] },
+            { text: "How many disco balls is too many?", options: ["More than 1", "More than 5", "More than 50", "Room is mirror"] },
+            { text: "What's your take on pangolins?", options: ["Scaly anteaters", "Pine cone animals", "Illegal to traffic", "We're colleagues"] },
+            { text: "If you had to be a specific condiment, which?", options: ["Ketchup", "Mustard", "Ranch", "Tears"] },
+            { text: "How do you feel about professional tag?", options: ["Cool sport", "Weird concept", "My calling", "I'm undefeated"] },
+            { text: "What's your ideal ratio of syrup to pancake?", options: ["Light drizzle", "Good coverage", "Syrup soup", "No pancake visible"] },
+            { text: "You can only own one piece of furniture. Which?", options: ["Bed", "Chair", "Desk", "Bean bag"] },
+            { text: "How many glow sticks is too many to crack at once?", options: ["More than 5", "More than 20", "More than 100", "I am luminescent"] },
+            { text: "What's your relationship with quokkas?", options: ["Smiling marsupials", "Happiest animals", "Island friends", "We take selfies"] },
+            { text: "If you could only eat food cooked one way, which?", options: ["Baked", "Fried", "Grilled", "Raw"] },
+            { text: "How do you feel about cowbells?", options: ["Farming tool", "More needed", "Peak music", "I wear seven"] },
+            { text: "What's your strategy for eating chicken tenders?", options: ["One at a time", "Handful", "Sauce assignment", "Blend into smoothie"] },
+            { text: "You can only wear one type of neckwear. Which?", options: ["No neckwear", "Tie", "Scarf", "Collar of shame"] },
+            { text: "How many lava lamps is a reasonable amount?", options: ["1-2", "5-10", "20+", "House is lava"] },
+            { text: "What's your take on red pandas?", options: ["Not real pandas", "Firefox logo", "Tree cats", "We're cousins"] },
+            { text: "If you had to be a specific type of tree, which?", options: ["Oak (strong)", "Willow (sad)", "Pine (pointy)", "Plastic (fake)"] },
+            { text: "How do you feel about theremin music?", options: ["Spooky vibes", "Weird sound", "Peak instrument", "I play professionally"] },
+            { text: "What's your ideal amount of confetti?", options: ["None", "Handful", "Bucket full", "Everything is confetti"] },
+            { text: "You can only eat vegetables from one color group. Which?", options: ["Green", "Orange", "Red", "Purple"] },
+            { text: "How many tambourines could you play at once?", options: ["1-2", "3-5", "10+", "I am tambourine"] },
+            { text: "What's your relationship with echidnas?", options: ["Spiky egg-layers", "Knuckles (Sonic)", "Walking cacti", "We're related"] },
+            { text: "If you could only eat cereal with one liquid, which?", options: ["Milk", "Water (brave)", "Orange juice", "Melted ice cream"] },
+            { text: "How do you feel about the phrase 'higgledy-piggledy'?", options: ["Nonsense word", "Fun to say", "Use it correctly", "I say it constantly"] },
+            { text: "What's your strategy for eating a taco salad?", options: ["Mix it up", "Layer by layer", "Just eat bowl", "It's just tacos"] },
+            { text: "You can only sleep in one position. Which?", options: ["Back", "Side", "Stomach", "Hanging upside down"] },
+            { text: "How many maracas is too many?", options: ["More than 2", "More than 10", "More than 100", "I shake constantly"] },
+            { text: "What's your take on sugar gliders?", options: ["Flying squirrels", "Pocket pets", "Gliding experts", "We glide together"] }
+	]
+
+        let categories = [];
+        let selectedCategory = '';
+        let currentQuestionIndex = 0;
+        let selectedQuestions = [];
+        let answers = [];
+        let jeopardyAudio = null;
+
+        function startJeopardySound() {
+            if (jeopardyAudio) return;
+            
+            jeopardyAudio = new Audio('jeopardy-theme.mp3');
+            jeopardyAudio.loop = true;
+            jeopardyAudio.playbackRate = 1.0;
+            
+            jeopardyAudio.play().catch(err => {
+                console.error('Audio playback failed:', err);
+            });
+        }
+        
+        function updateAudioSpeed() {
+            if (jeopardyAudio) {
+                const progress = currentQuestionIndex / selectedQuestions.length;
+                jeopardyAudio.playbackRate = 1 + (progress * 2);
+            }
+        }
+        
+        function stopJeopardySound() {
+            if (jeopardyAudio) {
+                jeopardyAudio.pause();
+                jeopardyAudio.currentTime = 0;
+                jeopardyAudio = null;
+            }
+        }
+
+        async function fetchCategories() {
+            try {
+                const response = await fetch('https://en.wikipedia.org/w/api.php?action=query&list=allcategories&aclimit=500&acmin=100&format=json&origin=*');
+                const data = await response.json();
+                
+                const allCategories = data.query.allcategories
+                    .map(cat => cat['*'].trim())
+                    .filter(cat => !cat.includes(' ') && cat.length > 3 && cat.length < 15)
+                    .slice(0, 100);
+                
+                categories = allCategories.sort(() => Math.random() - 0.5);
+                
+                if (categories.length === 0) {
+                    throw new Error('No categories found');
+                }
+                
+                displayCategoryDropdown();
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                categories = ['Animals', 'Colors', 'Countries', 'Foods', 'Planets', 'Sports', 'Vegetables', 'Languages', 'Currencies', 'Mountains', 'Rivers', 'Cities', 'Fruits', 'Trees', 'Flowers', 'Metals', 'Games', 'Instruments', 'Tools', 'Vehicles'];
+                displayCategoryDropdown();
+            }
+        }
+
+        function displayCategoryDropdown() {
+            const blank = document.getElementById('categoryBlank');
+            const loading = document.getElementById('loadingCategories');
+            loading.style.display = 'none';
+            
+            const select = document.createElement('select');
+            select.innerHTML = '<option value="">______________</option>' + 
+                categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            
+            blank.innerHTML = '';
+            blank.appendChild(select);
+            
+            select.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    selectedCategory = e.target.value;
+                    
+                    // Replace dropdown with text at same font size as title
+                    blank.innerHTML = `<span class="category-selected">${selectedCategory}</span>`;
+                    
+                    setTimeout(() => {
+                        startQuiz();
+                    }, 800);
+                }
+            });
+        }
+
+        function startQuiz() {
+            selectedQuestions = questions.sort(() => Math.random() - 0.5).slice(0, 10);
+            answers = [];
+            currentQuestionIndex = 0;
+            
+            const titleScreen = document.getElementById('titleScreen');
+            const quizScreen = document.getElementById('quizScreen');
+            
+            titleScreen.classList.add('fade-out');
+            
+            setTimeout(() => {
+                titleScreen.style.display = 'none';
+                titleScreen.classList.remove('fade-out');
+                quizScreen.style.display = 'block';
+                
+                setTimeout(() => {
+                    quizScreen.classList.add('show');
+                }, 50);
+                
+                displayQuestion();
+                
+                document.addEventListener('click', function startAudio() {
+                    startJeopardySound();
+                    document.removeEventListener('click', startAudio);
+                }, { once: true });
+            }, 800);
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex) / selectedQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function displayQuestion() {
+            const container = document.getElementById('questionContainer');
+            const question = selectedQuestions[currentQuestionIndex];
+            
+            updateProgress();
+            
+            container.innerHTML = `
+                <div class="question-number">Question ${currentQuestionIndex + 1} of ${selectedQuestions.length}</div>
+                <div class="question-text">${question.text}</div>
+                <div class="options">
+                    ${question.options.map((opt, i) => 
+                        `<div class="option" data-index="${i}">${opt}</div>`
+                    ).join('')}
+                </div>
+            `;
+            
+            const options = container.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.addEventListener('click', () => {
+                    options.forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    document.getElementById('nextButton').disabled = false;
+                });
+            });
+            
+            document.getElementById('nextButton').disabled = true;
+        }
+
+        async function showResults() {
+            stopJeopardySound();
+            
+            const quizScreen = document.getElementById('quizScreen');
+            const resultScreen = document.getElementById('resultScreen');
+            
+            quizScreen.classList.remove('show');
+            quizScreen.classList.add('fade-out');
+            
+            setTimeout(() => {
+                quizScreen.style.display = 'none';
+                quizScreen.classList.remove('fade-out');
+                resultScreen.classList.add('show');
+            }, 800);
+            
+            document.getElementById('resultTitle').textContent = 'Calculating your result...';
+            
+            const hash = answers.reduce((acc, val, idx) => acc + val * (idx + 1), 0);
+            
+            try {
+                const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:${encodeURIComponent(selectedCategory)}&cmlimit=1000&cmtype=page&cmnamespace=0&cmsort=sortkey&format=json&origin=*`);
+                const data = await response.json();
+                
+                if (!data.query || !data.query.categorymembers || data.query.categorymembers.length === 0) {
+                    throw new Error('No members found in category');
+                }
+                
+                const members = data.query.categorymembers;
+                
+                // Filter out disambiguation pages, lists, redirects, and subsections
+                const filteredMembers = members.filter(m => 
+                    !m.title.includes('(disambiguation)') &&
+                    !m.title.toLowerCase().includes('list of') &&
+                    !m.title.includes('/') &&  // Remove subsections
+                    !m.title.includes(':') &&  // Remove special pages
+                    !m.title.toLowerCase().includes('index of') &&
+                    !m.title.toLowerCase().includes('outline of') &&
+                    !m.title.toLowerCase().includes('glossary of')
+                );
+                
+                if (filteredMembers.length === 0) {
+                    throw new Error('No suitable members found');
+                }
+                
+                const index = hash % filteredMembers.length;
+                const selectedMember = filteredMembers[index];
+                
+                await displayResult(selectedMember.title);
+            } catch (error) {
+                console.error('Error fetching category members:', error);
+                
+                try {
+                    const searchResponse = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(selectedCategory)}&limit=50&namespace=0&format=json&origin=*`);
+                    const searchData = await searchResponse.json();
+                    
+                    if (searchData[1] && searchData[1].length > 0) {
+                        const filteredTitles = searchData[1].filter(title => 
+                            !title.toLowerCase().includes('list of') &&
+                            !title.toLowerCase().includes('category:') &&
+                            !title.includes('/') &&
+                            !title.includes(':') &&
+                            !title.toLowerCase().includes('index of') &&
+                            !title.toLowerCase().includes('outline of') &&
+                            !title.toLowerCase().includes('glossary of') &&
+                            title.toLowerCase() !== selectedCategory.toLowerCase()
+                        );
+                        
+                        if (filteredTitles.length > 0) {
+                            const index = hash % filteredTitles.length;
+                            const selectedTitle = filteredTitles[index];
+                            await displayResult(selectedTitle);
+                            return;
+                        }
+                    }
+                } catch (fallbackError) {
+                    console.error('Fallback search failed:', fallbackError);
+                }
+                
+                document.getElementById('resultTitle').textContent = `You are related to ${selectedCategory}!`;
+                document.getElementById('resultSummary').textContent = 'Unfortunately, we couldn\'t find a specific result from Wikipedia. Try another category!';
+                document.getElementById('wikiLink').style.display = 'none';
+            }
+        }
+
+        async function displayResult(title) {
+            try {
+                const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=extracts|pageimages&exintro=1&explaintext=1&pithumbsize=500&format=json&origin=*`);
+                const data = await response.json();
+                const page = Object.values(data.query.pages)[0];
+                
+                document.getElementById('resultTitle').textContent = `You are: ${page.title}!`;
+                
+                if (page.thumbnail) {
+                    const img = document.getElementById('resultImage');
+                    img.src = page.thumbnail.source;
+                    img.style.display = 'block';
+                }
+                
+                const summary = page.extract || 'No summary available.';
+                document.getElementById('resultSummary').textContent = summary.substring(0, 500) + (summary.length > 500 ? '...' : '');
+                
+                document.getElementById('wikiLink').href = `https://en.wikipedia.org/wiki/${encodeURIComponent(page.title)}`;
+            } catch (error) {
+                console.error('Error fetching article:', error);
+                document.getElementById('resultTitle').textContent = `You are: ${title}!`;
+            }
+        }
+
+        document.getElementById('nextButton').addEventListener('click', () => {
+            const selected = document.querySelector('.option.selected');
+            if (selected) {
+                answers.push(parseInt(selected.dataset.index));
+                currentQuestionIndex++;
+                
+                updateAudioSpeed();
+                
+                if (currentQuestionIndex < selectedQuestions.length) {
+                    displayQuestion();
+                } else {
+                    showResults();
+                }
+            }
+        });
+
+        document.getElementById('homeButton').addEventListener('click', (e) => {
+            e.preventDefault();
+            location.reload();
+        });
+
+        fetchCategories();
+    </script>
+</body>
+</html>
