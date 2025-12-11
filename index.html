@@ -51,18 +51,17 @@
         }
 
         h1 {
-            font-size: 1.4em;
+            font-size: 1.2em;
             color: #fff;
             margin-bottom: 20px;
             line-height: 1.3;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            overflow: visible;
         }
 
         @media (min-width: 480px) {
             h1 {
-                font-size: 1.8em;
+                font-size: 1.6em;
             }
         }
 
@@ -74,8 +73,8 @@
 
         .category-blank {
             display: inline-block;
-            min-width: 80px;
-            padding: 4px 8px;
+            min-width: 60px;
+            padding: 2px 6px;
             cursor: pointer;
             position: relative;
             transition: all 0.3s ease;
@@ -85,7 +84,7 @@
 
         @media (min-width: 480px) {
             .category-blank {
-                min-width: 120px;
+                min-width: 100px;
                 padding: 6px 12px;
             }
         }
@@ -98,15 +97,15 @@
         }
 
         select {
-            font-size: 0.7em;
-            padding: 4px 6px;
+            font-size: 0.75em;
+            padding: 2px 4px;
             border: none;
             border-radius: 4px;
             background: #2a2a2a;
             color: #4a90e2;
             cursor: pointer;
-            min-width: 80px;
-            max-width: 150px;
+            min-width: 60px;
+            max-width: 120px;
             outline: none;
         }
 
@@ -116,7 +115,7 @@
 
         @media (min-width: 480px) {
             select {
-                font-size: 0.75em;
+                font-size: 0.8em;
                 padding: 4px 8px;
                 min-width: 100px;
                 max-width: 180px;
@@ -125,7 +124,7 @@
 
         @media (min-width: 768px) {
             select {
-                font-size: 0.8em;
+                font-size: 0.9em;
                 padding: 6px 10px;
                 min-width: 120px;
                 max-width: 200px;
@@ -136,7 +135,7 @@
             color: #4a90e2;
             font-size: inherit;
             display: inline-block;
-            max-width: 150px;
+            max-width: 100px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -145,7 +144,7 @@
 
         @media (min-width: 480px) {
             .category-selected {
-                max-width: 200px;
+                max-width: 180px;
             }
         }
 
@@ -748,7 +747,7 @@
 
         async function fetchCategories() {
             try {
-                const response = await fetch('https://en.wikipedia.org/w/api.php?action=query&list=allcategories&aclimit=500&acmin=100&format=json&origin=*');
+                const response = await fetch('https://en.wikipedia.org/w/api.php?action=query&list=allcategories&aclimit=500&acmin=1000&format=json&origin=*');
                 const data = await response.json();
                 
                 const allCategories = data.query.allcategories
