@@ -397,8 +397,6 @@
     </div>
 
     <script>
-        // TODO: Fill in your questions here
-        // Format: { text: "Question text?", options: ["Option 1", "Option 2", "Option 3", "Option 4"] }
         const questions = [
             { text: "How many bees do you think you could reasonably fit in your mouth?", options: ["Zero, I value my life", "3-5 if they're chill about it", "A full handful", "I AM THE BEE KING"] },
             { text: "If you had to fight a historical figure, who would you choose?", options: ["Gandhi (seems nice)", "Abraham Lincoln (tall but old)", "Napoleon (short king)", "Rasputin (unkillable)"] },
@@ -747,24 +745,41 @@
 
         async function fetchCategories() {
             try {
-                const response = await fetch('https://en.wikipedia.org/w/api.php?action=query&list=allcategories&aclimit=500&acmin=1000&format=json&origin=*');
-                const data = await response.json();
+                // Use a curated list of genuinely popular, fun categories
+                // These are categories that have lots of interesting members
+                const popularCategories = [
+                    'Animals', 'Birds', 'Fish', 'Reptiles', 'Mammals', 'Insects',
+                    'Dogs', 'Cats', 'Dinosaurs',
+                    'Countries', 'Cities', 'Languages', 'Rivers', 'Mountains',
+                    'Foods', 'Fruits', 'Vegetables', 'Drinks', 'Cheeses',
+                    'Colors', 'Flowers', 'Trees', 'Plants',
+                    'Sports', 'Games', 'Weapons', 'Tools', 'Vehicles',
+                    'Instruments', 'Composers', 'Painters', 'Writers',
+                    'Elements', 'Metals', 'Minerals', 'Rocks',
+                    'Planets', 'Stars', 'Galaxies',
+                    'Diseases', 'Drugs', 'Phobias',
+                    'Films', 'Books', 'Novels', 'Comics',
+                    'Companies', 'Brands', 'Airlines',
+                    'Religions', 'Deities', 'Demons', 'Angels',
+                    'Castles', 'Palaces', 'Museums', 'Stadiums',
+                    'Islands', 'Deserts', 'Forests', 'Lakes'
+                ];
                 
-                const allCategories = data.query.allcategories
-                    .map(cat => cat['*'].trim())
-                    .filter(cat => !cat.includes(' ') && cat.length > 3 && cat.length < 15)
-                    .slice(0, 100);
-                
-                categories = allCategories.sort(() => Math.random() - 0.5);
-                
-                if (categories.length === 0) {
-                    throw new Error('No categories found');
-                }
+                // Shuffle and take 25 random ones
+                const shuffled = popularCategories.sort(() => Math.random() - 0.5);
+                categories = shuffled.slice(0, 25);
                 
                 displayCategoryDropdown();
             } catch (error) {
-                console.error('Error fetching categories:', error);
-                categories = ['Animals', 'Colors', 'Countries', 'Foods', 'Planets', 'Sports', 'Vegetables', 'Languages', 'Currencies', 'Mountains', 'Rivers', 'Cities', 'Fruits', 'Trees', 'Flowers', 'Metals', 'Games', 'Instruments', 'Tools', 'Vehicles'];
+                console.error('Error loading categories:', error);
+                // Minimal fallback
+                categories = [
+                    'Animals', 'Birds', 'Countries', 'Foods', 'Colors',
+                    'Sports', 'Games', 'Instruments', 'Planets', 'Elements',
+                    'Trees', 'Flowers', 'Mountains', 'Rivers', 'Cities',
+                    'Languages', 'Vehicles', 'Tools', 'Weapons', 'Metals',
+                    'Fish', 'Dinosaurs', 'Films', 'Books', 'Islands'
+                ];
                 displayCategoryDropdown();
             }
         }
@@ -854,6 +869,48 @@
             });
             
             document.getElementById('nextButton').disabled = true;
+        }
+
+        async function getAllCategoryMembers(category, maxPages = 1000) {
+            let allMembers = [];
+            let continueToken = null;
+            
+            do {
+                const params = new URLSearchParams({
+                    action: 'query',
+                    list: 'categorymembers',
+                    cmtitle: `Category:${category}`,
+                    cmlimit: 100,
+                    cmtype: 'page',
+                    cmnamespace: 0,
+                    cmsort: 'sortkey',
+                    format: 'json',
+                    origin: '*'
+                });
+                
+                if (continueToken) {
+                    params.append('cmcontinue', continueToken);
+                }
+                
+                const response = await fetch(`https://en.wikipedia.org/w/api.php?${params}`);
+                const data = await response.json();
+                
+                if (data.query && data.query.categorymembers) {
+                    allMembers = allMembers.concat(data.query.categorymembers);
+                }
+                
+                // Check if there are more results
+                continueToken = data.continue ? data.continue.cmcontinue : null;
+                
+                // Stop if we've reached maxPages
+                if (allMembers.length >= maxPages) {
+                    allMembers = allMembers.slice(0, maxPages);
+                    break;
+                }
+                
+            } while (continueToken);
+            
+            return allMembers;
         }
 
         async function showResults() {
